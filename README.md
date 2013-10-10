@@ -1,4 +1,4 @@
-!! Cypher-RS
+## Cypher-RS
 
 Neo4j server-extension that allows to configure fixed REST-Endpoints for Cypher queries.
 
@@ -8,9 +8,9 @@ You can `put` cypher queries to an endpoint with a certain url-suffix and then l
 * `POST` with JSON (map) payload for parameters
 * `POST` with CSV payload for parameters
 
-!!! Examples
+### Examples
 
-!!!! Endpoints
+#### Endpoints
 
 Create
 
@@ -36,7 +36,7 @@ Delete
 
     DELETE /cypher-rs/users
 
-!!!! Types of results:
+#### Types of results:
 
 single column, single row
 
@@ -61,7 +61,7 @@ multiple columns, multiple rows (column names are keys)
       {"user": "Peter", "friends": ["Andres","Michael"]}
     ]
 
-!!! Configuration
+### Configuration
 
 Build with `mvn clean install dependency:copy-dependencies`
 
@@ -72,7 +72,7 @@ Add this line to `path/to/server/conf/neo4j-server.properties`
     org.neo4j.server.thirdparty_jaxrs_classes=org.neo4j.cypher_rs=/cypher-rs
 
 
-!!! Notes
+### Notes
 
 There is some magic happening with converting query parameters to cypher parameters, as query-parameters are all strings
 things that look like a number are converted to numbers and collections (aka multiple query parameters) are converted into
