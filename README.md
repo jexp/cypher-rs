@@ -90,7 +90,7 @@ things that look like a number are converted to numbers and collections (aka mul
 lists.
 
 
-!!! Ideas
+### Ideas
 
 * all endpoints should be able to generate CSV when supplied with the accept header
 * replace Jackson with faster Gson?
