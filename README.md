@@ -2,11 +2,11 @@
 
 Neo4j server-extension that allows to configure fixed REST-Endpoints for Cypher queries.
 
-You can `put` cypher queries to an endpoint with a certain url-suffix and then later on execute those queries by running
+You can `PUT` cypher queries to an endpoint with a certain url-suffix and then later execute those queries by running
 
-* `GET` with query parameters
-* `POST` with JSON (map) payload for parameters
-* `POST` with CSV payload for parameters
+* `GET` with query parameters, only readonly queries
+* `POST` with JSON (map, list of maps) payload for parameters
+* `POST` with CSV payload for parameters, with optional batch-size and delimiter
 
 ### Examples
 
@@ -26,10 +26,21 @@ Query
     --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
 
 
+POST JSON-Data
+
     POST /cypher-rs/users content-type:application/json {"name":"Andres"}
     --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
 
+    POST /cypher-rs/users content-type:application/json [{"name":"Andres"},{"name":"Peter"}]
+    --> 200 [{"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]},
+             {"name":"Peter","age":32,"male":true,"children":["Neo4j","O.","K."]}]
+
+POST CSV Data
+
     POST /cypher-rs/create-user content-type:text/plain "name,age,male\nAndres,21,true"
+    --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
+
+    POST /cypher-rs/create-user?delim=\t&batch=20000 content-type:text/plain "name\tage\tmale\nAndres\t21\ttrue"
     --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
 
 Delete
@@ -77,3 +88,10 @@ Add this line to `path/to/server/conf/neo4j-server.properties`
 There is some magic happening with converting query parameters to cypher parameters, as query-parameters are all strings
 things that look like a number are converted to numbers and collections (aka multiple query parameters) are converted into
 lists.
+
+
+!!! Ideas
+
+* all endpoints should be able to generate CSV when supplied with the accept header
+* replace Jackson with faster Gson?
+* performance tests

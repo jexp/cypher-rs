@@ -1,6 +1,5 @@
 package org.neo4j.cypher_rs;
 
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.server.rest.repr.BadInputException;
@@ -8,10 +7,7 @@ import org.neo4j.server.rest.repr.BadInputException;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -43,7 +39,7 @@ public class Utils {
         return result;
     }
 
-    private static Object convertIfNeeded(String value) {
+    public static Object convertIfNeeded(String value) {
         if (value.equalsIgnoreCase("true")) return true;
         if (value.equalsIgnoreCase("false")) return false;
         if (value.matches("^[+-]?[0-9.]+$")) {
@@ -58,16 +54,23 @@ public class Utils {
     }
 
     @SuppressWarnings("unchecked")
-    static Map<String, Object> toParams(String body) throws BadInputException {
+    static List<Map<String, Object>> toParams(String body) throws BadInputException {
         try {
-            return OBJECT_MAPPER.readValue(body, Map.class);
+            Object data = OBJECT_MAPPER.readValue(body, Object.class);
+            if (data instanceof Map) return Arrays.asList((Map<String, Object>)data);
+            if (data instanceof List) return (List<Map<String, Object>>)data;
+            throw new BadInputException("Cannot read as JSON list or map: "+"\n"+body);
         } catch (IOException ioe) {
-            throw new BadInputException("Cannot read as JSON map: "+ioe.getMessage()+"\n"+body);
+            throw new BadInputException("Cannot read as JSON list or map: "+ioe.getMessage()+"\n"+body);
         }
     }
 
     static String toJson(ExecutionResult result) throws IOException {
-        return toJson(new CypherResultRenderer().render(result));
+        return toJson(toObject(result));
+    }
+
+    public static Object toObject(ExecutionResult result) {
+        return new CypherResultRenderer().render(result);
     }
 
     public static String toJson(Object value) throws IOException {
@@ -75,7 +78,7 @@ public class Utils {
     }
 
     static void writeToJson(ExecutionResult result, OutputStream out) throws IOException {
-        Object data = new CypherResultRenderer().render(result);
+        Object data = toObject(result);
         OBJECT_MAPPER.writeValue(out, data);
     }
 
