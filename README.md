@@ -58,12 +58,14 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 #### Examples
 
     POST /cypher-rs/users 
-    Content-type:application/json
+    Content-type: application/json
     Body: {"name":"Andres"}
     
     --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
 
-    POST /cypher-rs/users content-type:application/json [{"name":"Andres"},{"name":"Peter"}]
+    POST /cypher-rs/users
+    Content-type: application/json
+    Body: [{"name":"Andres"},{"name":"Peter"}]
     
     --> 200 [{"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]},
              {"name":"Peter","age":32,"male":true,"children":["Neo4j","O.","K."]}]
