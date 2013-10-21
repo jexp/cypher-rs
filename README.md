@@ -15,7 +15,7 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
     Headers:
         Content-type: plain/text
     Body:
-        <youtCypherRequest>
+        <yourCypherRequest>
         
 #### Examples
 
