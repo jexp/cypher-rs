@@ -70,7 +70,6 @@ public class CypherRsService {
 
     @GET
     @Path("/{key}")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response readEndpoint(@PathParam("key") String key, @Context UriInfo uriInfo) {
         try (Transaction tx = db.beginTx()) {
