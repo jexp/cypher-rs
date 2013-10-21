@@ -80,21 +80,21 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 #### Examples
 
     POST /cypher-rs/create-user
-    Content-type:text/plain
+    Content-type: text/plain
     Body: name,age,male\nAndres,21,true
     
     --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
 
     POST /cypher-rs/create-user?delim=\t&batch=20000
-    Content-type:text/plain
+    Content-type: text/plain
     Body: name\tage\tmale\nAndres\t21\ttrue
     
     --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
 
 ### DELETE ENDPOINT
 
-    Request verb: DELETE
-    Request URL: /cypher-rs/<yourEndpoint>
+    Verb: DELETE
+    URL: /cypher-rs/<yourEndpoint>
 
 #### Example
 
