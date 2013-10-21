@@ -35,14 +35,11 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 
     Verb: GET
     URL: /cypher-rs/<yourEndpoint>
-    Headers:
-        Content-type: application/x-www-form-urlencoded
 
 #### Example
 
     GET /cypher-rs/users?name=Andres
-    Content-type: application/x-www-form-urlencoded
-    
+
     --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
 
 
