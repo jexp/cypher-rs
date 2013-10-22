@@ -8,46 +8,100 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 * `POST` with JSON (map, list of maps) payload for parameters
 * `POST` with CSV payload for parameters, with optional batch-size and delimiter
 
-### Examples
+### CREATE ENDPOINT
 
-#### Endpoints
+    Verb: PUT
+    URL: /cypher-rs/<yourEndpoint>
+    Headers:
+        Content-type: plain/text
+    Body:
+        <yourCypherRequest>
+        
+#### Examples
 
-Create
-
-    PUT /cypher-rs/users "match (n:User) where n.name={name} return n"
+    PUT /cypher-rs/users
+    Content-type: plain/text
+    Body: match (n:User) where n.name={name} return n
+    
     --> 201 Location: /cypher-rs/users
 
-    PUT /cypher-rs/create-user "create (n:Node {name:{name},age:{age},male:{male}})"
+    PUT /cypher-rs/create-user
+    Content-type: plain/text
+    Body: create (n:Node {name:{name},age:{age},male:{male}})
+    
     --> 201 Location: /cypher-rs/create-user
 
-Query
+### QUERY ENDPOINT
+
+    Verb: GET
+    URL: /cypher-rs/<yourEndpoint>
+
+#### Example
 
     GET /cypher-rs/users?name=Andres
+
     --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
 
 
-POST JSON-Data
+### POST JSON-DATA TO ENDPOINT
 
-    POST /cypher-rs/users content-type:application/json {"name":"Andres"}
+    Verb: POST
+    URL: /cypher-rs/<yourEndpoint>
+    Headers:
+        Content-type: application/json
+    Body:
+        <jsonData>
+
+#### Examples
+
+    POST /cypher-rs/users 
+    Content-type: application/json
+    Body: {"name":"Andres"}
+    
     --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
 
-    POST /cypher-rs/users content-type:application/json [{"name":"Andres"},{"name":"Peter"}]
+    POST /cypher-rs/users
+    Content-type: application/json
+    Body: [{"name":"Andres"},{"name":"Peter"}]
+    
     --> 200 [{"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]},
              {"name":"Peter","age":32,"male":true,"children":["Neo4j","O.","K."]}]
 
-POST CSV Data
+### POST CSV DATA TO ENDPOINT
 
-    POST /cypher-rs/create-user content-type:text/plain "name,age,male\nAndres,21,true"
+    Verb: POST
+    URL: /cypher-rs/<yourEndpoint>
+    Headers:
+        Content-type: text/plain
+    Body:
+        <csvData>
+
+#### Examples
+
+    POST /cypher-rs/create-user
+    Content-type: text/plain
+    Body: name,age,male\nAndres,21,true
+    
     --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
 
-    POST /cypher-rs/create-user?delim=\t&batch=20000 content-type:text/plain "name\tage\tmale\nAndres\t21\ttrue"
+    POST /cypher-rs/create-user?delim=\t&batch=20000
+    Content-type: text/plain
+    Body: name\tage\tmale\nAndres\t21\ttrue
+    
     --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
 
-Delete
+### DELETE ENDPOINT
+
+    Verb: DELETE
+    URL: /cypher-rs/<yourEndpoint>
+
+#### Example
 
     DELETE /cypher-rs/users
 
-#### Types of results:
+    --> 200 
+
+### Types of results:
 
 single column, single row
 

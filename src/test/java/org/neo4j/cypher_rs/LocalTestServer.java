@@ -32,7 +32,7 @@ import org.neo4j.server.modules.RESTApiModule;
 import org.neo4j.server.modules.ServerModule;
 import org.neo4j.server.modules.ThirdPartyJAXRSModule;
 import org.neo4j.server.preflight.PreFlightTasks;
-import org.neo4j.server.web.Jetty6WebServer;
+import org.neo4j.server.web.Jetty9WebServer;
 import org.neo4j.server.web.WebServer;
 import org.neo4j.test.ImpermanentGraphDatabase;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -69,7 +69,7 @@ public class LocalTestServer {
         if (neoServer!=null) throw new IllegalStateException("Server already running");
         URL url = getClass().getResource("/" + propertiesFile);
         if (url==null) throw new IllegalArgumentException("Could not resolve properties file "+propertiesFile);
-        final Jetty6WebServer jettyWebServer = new Jetty6WebServer();
+        final Jetty9WebServer jettyWebServer = new Jetty9WebServer();
         neoServer = new CommunityNeoServer(new PropertyFileConfigurator(new File(url.getPath()))) {
             @Override
             protected int getWebServerPort() {
