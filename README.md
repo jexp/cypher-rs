@@ -21,13 +21,13 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 
     PUT /cypher-rs/users
     Content-type: plain/text
-    Body: match (n:User) where n.name={name} return n
+    Body: start n=node:node_auto_index(name={name}) return n
     
     --> 201 Location: /cypher-rs/users
 
     PUT /cypher-rs/create-user
     Content-type: plain/text
-    Body: create (n:Node {name:{name},age:{age},male:{male}})
+    Body: create (n {name:{name},age:{age},male:{male}})
     
     --> 201 Location: /cypher-rs/create-user
 
@@ -82,13 +82,13 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
     Content-type: text/plain
     Body: name,age,male\nAndres,21,true
     
-    --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
+    --> 200 {"nodes_created":1,"properties_set":3,"rows":1}
 
     POST /cypher-rs/create-user?delim=\t&batch=20000
     Content-type: text/plain
     Body: name\tage\tmale\nAndres\t21\ttrue
     
-    --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
+    --> 200 {"nodes_created":1,"properties_set":3,"rows":1}
 
 ### DELETE ENDPOINT
 
@@ -130,7 +130,7 @@ multiple columns, multiple rows (column names are keys)
 
 Build with `mvn clean install dependency:copy-dependencies`
 
-Copy files `cp target/cypher-rs-2.0-SNAPSHOT.jar target/dependency/opencsv-2.3.jar path/to/server/plugins`
+Copy files `cp target/cypher-rs-1.9-SNAPSHOT.jar target/dependency/opencsv-2.3.jar path/to/server/plugins`
 
 Add this line to `path/to/server/conf/neo4j-server.properties`
 
