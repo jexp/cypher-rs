@@ -47,12 +47,15 @@ public class CypherRsService {
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response removeEndpoint(@PathParam("key") String key) {
-        try (Transaction tx = db.beginTx()) {
+        Transaction tx = db.beginTx();
+        try {
             if (props.hasProperty(key)) {
                 props.removeProperty(key);
                 tx.success();
                 return Response.ok().build();
             }
+        } finally {
+            tx.finish();
         }
         return notFound();
     }
@@ -61,10 +64,13 @@ public class CypherRsService {
     @Path("/{key}")
     @Consumes(MediaType.TEXT_PLAIN)
     public Response createEndpoint(@PathParam("key") String key, String body, @Context UriInfo uriInfo) {
-        try (Transaction tx = db.beginTx()) {
+        Transaction tx = db.beginTx();
+        try {
             props.setProperty(key, body);
             tx.success();
             return Response.created(uriInfo.getRequestUri()).build();
+        } finally {
+            tx.finish();
         }
     }
 
@@ -72,7 +78,8 @@ public class CypherRsService {
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response readEndpoint(@PathParam("key") String key, @Context UriInfo uriInfo) {
-        try (Transaction tx = db.beginTx()) {
+        Transaction tx = db.beginTx();
+        try {
             if (props.hasProperty(key)) {
                 String query = (String) props.getProperty(key);
                 if (Utils.isWriteQuery(query)) return Response.status(Response.Status.NOT_ACCEPTABLE).build();
@@ -83,8 +90,11 @@ public class CypherRsService {
                 return Response.ok(json).build();
             }
         } catch(Exception e) {
+            tx.failure();
             e.printStackTrace();
             return Response.serverError().entity(e.getMessage()).build();
+        } finally {
+            tx.finish();
         }
         return notFound();
     }
@@ -94,7 +104,8 @@ public class CypherRsService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response writeEndpoint(@PathParam("key") String key, String body) {
-        try (Transaction tx = db.beginTx()) {
+        Transaction tx = db.beginTx();
+        try {
             if (props.hasProperty(key)) {
                 List<Map<String, Object>> params = Utils.toParams(body);
                 List<Object> results=new ArrayList<>();
@@ -107,10 +118,13 @@ public class CypherRsService {
                 return Response.ok(Utils.toJson(singleOrList(results))).build();
             }
         } catch (BadInputException e) {
+            tx.failure();
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (Exception e) {
-            e.printStackTrace();
+            tx.failure();
             return Response.serverError().entity(e.getMessage()).build();
+        } finally {
+            tx.finish();
         }
         return notFound();
     }
@@ -133,26 +147,27 @@ public class CypherRsService {
                 String query = (String) props.getProperty(key);
                 if (delim==null) delim=",";
                 CSVReader reader = new CSVReader(body, delim.charAt(0),'"','\\',0,false,false);
-                Map<String,Integer> stats = toMap(0,"nodes_created","nodes_deleted","relationships_created","relationships_deleted","labels_added","labels_removed","properties_set","rows");
+                Map<String,Integer> stats = toMap(0,"nodes_created","nodes_deleted","relationships_created","relationships_deleted","properties_set","rows");
                 Map<String,Object> header= toMap(null,reader.readNext());
                 for (String[] row = reader.readNext(); row != null; row = reader.readNext()) {
                     ExecutionResult result = engine.execute(query, toParams(header,row));
                     accumulateStats(stats, result);
                     if (++count % batchSize == 0) {
-                        tx.success();tx.close(); tx = db.beginTx();
+                        tx.success();tx.finish(); tx = db.beginTx();
                     }
                 }
                 tx.success();
                 return Response.ok(Utils.toJson(stats)).build();
             }
         } catch (IOException e) {
+            tx.failure();
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (Exception e) {
-            e.printStackTrace();
+            tx.failure();
             return Response.serverError().entity(e.getMessage()).build();
         } finally {
-            tx.close();
             close(body);
+            tx.finish();
         }
         return notFound();
     }
@@ -172,7 +187,7 @@ public class CypherRsService {
         // "labels_added","labels_removed","properties_set","rows"
 
         add(data, stats.getNodesCreated(), stats.getDeletedNodes(), stats.getRelationshipsCreated(), stats.getDeletedRelationships(),
-                stats.getLabelsAdded(), stats.getLabelsRemoved(), stats.getPropertiesSet(), IteratorUtil.count(result));
+                stats.getPropertiesSet(), IteratorUtil.count(result));
     }
 
     private <T> Map<String, T> toMap(T value,String...row) {

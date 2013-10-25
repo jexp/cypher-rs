@@ -21,8 +21,7 @@ package org.neo4j.cypher_rs;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.IteratorUtil;
-import org.neo4j.kernel.impl.core.GraphPropertiesImpl;
+import org.neo4j.kernel.impl.core.GraphProperties;
 import org.neo4j.kernel.impl.core.NodeManager;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.configuration.PropertyFileConfigurator;
@@ -32,7 +31,7 @@ import org.neo4j.server.modules.RESTApiModule;
 import org.neo4j.server.modules.ServerModule;
 import org.neo4j.server.modules.ThirdPartyJAXRSModule;
 import org.neo4j.server.preflight.PreFlightTasks;
-import org.neo4j.server.web.Jetty9WebServer;
+import org.neo4j.server.web.Jetty6WebServer;
 import org.neo4j.server.web.WebServer;
 import org.neo4j.test.ImpermanentGraphDatabase;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -69,7 +68,7 @@ public class LocalTestServer {
         if (neoServer!=null) throw new IllegalStateException("Server already running");
         URL url = getClass().getResource("/" + propertiesFile);
         if (url==null) throw new IllegalArgumentException("Could not resolve properties file "+propertiesFile);
-        final Jetty9WebServer jettyWebServer = new Jetty9WebServer();
+        final Jetty6WebServer jettyWebServer = new Jetty6WebServer();
         neoServer = new CommunityNeoServer(new PropertyFileConfigurator(new File(url.getPath()))) {
             @Override
             protected int getWebServerPort() {
@@ -141,12 +140,15 @@ public class LocalTestServer {
     }
 
     private void cleanGraphProperties() {
-        try (Transaction tx = graphDatabase.beginTx()) {
-            GraphPropertiesImpl props = graphDatabase.getDependencyResolver().resolveDependency(NodeManager.class).getGraphProperties();
+        Transaction tx = graphDatabase.beginTx();
+        try {
+            GraphProperties props = graphDatabase.getDependencyResolver().resolveDependency(NodeManager.class).getGraphProperties();
             for (String key : asCollection(props.getPropertyKeys())) {
                 props.removeProperty(key);
             }
             tx.success();
+        } finally {
+            tx.finish();
         }
     }
 

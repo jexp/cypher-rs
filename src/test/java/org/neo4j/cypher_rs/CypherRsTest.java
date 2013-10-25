@@ -29,9 +29,12 @@ public class CypherRsTest extends RestTestBase {
         ClientResponse response = cypherRsPath.put(ClientResponse.class, QUERY);
         assertEquals(201, response.getStatus());
         assertEquals(cypherRsPath.getURI(),response.getLocation());
-        try (Transaction tx = beginTx()) {
+        Transaction tx = beginTx();
+        try {
             assertEquals(QUERY, properties().getProperty(KEY));
             tx.success();
+        } finally {
+            tx.finish();
         }
     }
     @Test

@@ -21,8 +21,8 @@ import static org.junit.Assert.assertEquals;
 public class CypherRsPostCsvTest extends RestTestBase {
 
     public static final String KEY = "foo";
-    public static final String WRITE_QUERY = "create (n:Node {name:{name}}) return n";
-    public static final String WRITE_QUERY_COLS = "create (n:Node {name:{name},age:{age},male:{male}}) return n";
+    public static final String WRITE_QUERY = "create (n {name:{name}}) return n";
+    public static final String WRITE_QUERY_COLS = "create (n {name:{name},age:{age},male:{male}}) return n";
 
     private WebResource cypherRsPath;
 
@@ -47,7 +47,6 @@ public class CypherRsPostCsvTest extends RestTestBase {
         assertEquals(true, result.contains("\"nodes_created\":1"));
         Map<String,Object> data = Utils.readJson(result);
         assertEquals(1,data.get("nodes_created"));
-        assertEquals(1,data.get("labels_added"));
         assertEquals(1,data.get("properties_set"));
         assertEquals(1,data.get("rows"));
         assertEquals(0,data.get("relationships_created"));
@@ -66,7 +65,6 @@ public class CypherRsPostCsvTest extends RestTestBase {
         assertEquals(result, 200, response.getStatus());
         Map<String,Object> data = Utils.readJson(result);
         assertEquals(count,data.get("nodes_created"));
-        assertEquals(count,data.get("labels_added"));
         assertEquals(count,data.get("properties_set"));
         assertEquals(count,data.get("rows"));
         assertEquals(0,data.get("relationships_created"));
@@ -81,7 +79,6 @@ public class CypherRsPostCsvTest extends RestTestBase {
         assertEquals(true, result.contains("\"nodes_created\":3"));
         Map<String,Object> data = Utils.readJson(result);
         assertEquals(3,data.get("nodes_created"));
-        assertEquals(3,data.get("labels_added"));
         assertEquals(3,data.get("properties_set"));
         assertEquals(3,data.get("rows"));
         assertEquals(0,data.get("relationships_created"));
@@ -125,7 +122,6 @@ public class CypherRsPostCsvTest extends RestTestBase {
         assertEquals(true, result.contains("\"nodes_created\":1"));
         Map<String,Object> data = Utils.readJson(result);
         assertEquals(1,data.get("nodes_created"));
-        assertEquals(1,data.get("labels_added"));
         assertEquals(3,data.get("properties_set"));
         assertEquals(1,data.get("rows"));
         assertEquals(0,data.get("relationships_created"));
@@ -140,7 +136,6 @@ public class CypherRsPostCsvTest extends RestTestBase {
         assertEquals(true, result.contains("\"nodes_created\":1"));
         Map<String,Object> data = Utils.readJson(result);
         assertEquals(1,data.get("nodes_created"));
-        assertEquals(1,data.get("labels_added"));
         assertEquals(3,data.get("properties_set"));
         assertEquals(1,data.get("rows"));
         assertEquals(0,data.get("relationships_created"));

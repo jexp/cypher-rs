@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public class CypherRsGetTest extends RestTestBase {
 
     public static final String KEY = "foo";
-    public static final String MULTI_COLUMN_QUERY = "match n where id(n) in {ids} return length(n.name) as l, n.name as name";
+    public static final String MULTI_COLUMN_QUERY = "start n=node({ids}) return length(n.name) as l, n.name as name";
     private WebResource cypherRsPath;
     public static final String QUERY = "start n=node({id}) return n";
     public static final String WRITE_QUERY = "create (n:Node {name:{name}}) return n";
@@ -30,11 +30,14 @@ public class CypherRsGetTest extends RestTestBase {
     }
 
     private Node createNode(String name, String value) {
-        try (Transaction tx = beginTx()) {
+        Transaction tx = beginTx();
+        try {
             Node node = getGraphDatabase().createNode();
             node.setProperty(name, value);
             tx.success();
             return node;
+        } finally {
+            tx.finish();
         }
     }
 
@@ -58,7 +61,7 @@ public class CypherRsGetTest extends RestTestBase {
     public void testQueryEndpointMultipleResults() throws Exception {
         Node andres=createNode("name","Andres");
         Node peter=createNode("name","Peter");
-        cypherRsPath.put(ClientResponse.class, "match n where id(n) in {ids} return n");
+        cypherRsPath.put(ClientResponse.class, "start n=node({ids}) return n");
         ClientResponse response = cypherRsPath
                 .queryParam("ids",String.valueOf(andres.getId()))
                 .queryParam("ids", String.valueOf(peter.getId()))

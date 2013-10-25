@@ -30,7 +30,7 @@ public class CypherResultRendererTest {
     @After
     public void tearDown() throws Exception {
         tx.success();
-        tx.close();
+        tx.finish();
         db.shutdown();
     }
 
