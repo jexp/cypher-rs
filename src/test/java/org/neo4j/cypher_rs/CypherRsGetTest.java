@@ -121,6 +121,23 @@ public class CypherRsGetTest extends RestTestBase {
     }
     
     @Test
+    public void testListEndpointsFull() throws Exception {
+        cypherRsPath.put(ClientResponse.class, QUERY);
+        
+        WebResource path = rootResource.path("test");
+        WebResource path2 = path.path(KEY + 2);
+        
+        path2.put(ClientResponse.class, MULTI_COLUMN_QUERY);
+        
+        ClientResponse response = path.queryParam("full", "true").get(ClientResponse.class);
+        
+        String result = response.getEntity(String.class);
+        assertEquals(result, 200, response.getStatus());
+        //@QueryParam
+        assertEquals("[{\"query\":\"" + QUERY + "\",\"name\":\"foo\"},{\"query\":\"" + MULTI_COLUMN_QUERY + "\",\"name\":\"foo2\"}]", result);
+    }
+    
+    @Test
     public void testEndpointDetails() throws Exception {
         cypherRsPath.put(ClientResponse.class, QUERY);
         

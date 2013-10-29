@@ -175,10 +175,27 @@ public class CypherRsService {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response listEndpoints() {
+    public Response listEndpoints(@DefaultValue("false") @QueryParam("full") boolean isFull) {
         
         try {
-            String json = Utils.toJson(props.getPropertyKeys());
+            
+            String json;
+            if(isFull) {
+                
+                List<Map<String, Object>> ret = new ArrayList<>();
+                
+                for(String key : props.getPropertyKeys()) {
+                    Map<String, Object> m = new HashMap<>(2);
+                    m.put("name", key);
+                    m.put("query", props.getProperty(key));
+                    ret.add(m);
+                }
+                
+                json = Utils.toJson(ret);
+            } else {
+                json = Utils.toJson(props.getPropertyKeys());
+            }
+            
             return Response.ok(json).build();
         } catch(Exception e) {
             e.printStackTrace();

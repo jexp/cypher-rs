@@ -112,7 +112,7 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 
     --> 200 ["users","create-user"]
 
-    GET /cypher-rs?full=1
+    GET /cypher-rs?full=true
 
     --> 200 [{"name":"users","query":"start n=node:node_auto_index(name={name}) return n"},{"name":"create-user","query":"create (n {name:{name},age:{age},male:{male}})"]
 
