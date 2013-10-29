@@ -74,6 +74,9 @@ public class Utils {
     }
 
     public static String toJson(Object value) throws IOException {
+        if(value == null)
+          return null;
+        
         return OBJECT_MAPPER.writeValueAsString(value);
     }
 
