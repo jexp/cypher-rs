@@ -73,7 +73,7 @@ public class CypherRsService {
             tx.finish();
         }
     }
-
+    
     @GET
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -86,7 +86,12 @@ public class CypherRsService {
                 Map<String, Object> params = Utils.toParams(uriInfo.getQueryParameters());
                 ExecutionResult result = engine.execute(query, params);
                 String json = Utils.toJson(result);
+                
                 tx.success();
+                
+                if(json == null)
+                    return noContent();
+                
                 return Response.ok(json).build();
             }
         } catch(Exception e) {
@@ -115,7 +120,12 @@ public class CypherRsService {
                     results.add(Utils.toObject(result));
                 }
                 tx.success();
-                return Response.ok(Utils.toJson(singleOrList(results))).build();
+                
+                Object retVal = singleOrList(results);
+                if(retVal == null)
+                    return noContent();
+                
+                return Response.ok(Utils.toJson(retVal)).build();
             }
         } catch (BadInputException e) {
             tx.failure();
@@ -172,6 +182,55 @@ public class CypherRsService {
         return notFound();
     }
 
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listEndpoints(@DefaultValue("false") @QueryParam("full") boolean isFull) {
+        
+        try {
+            
+            String json;
+            if(isFull) {
+                
+                List<Map<String, Object>> ret = new ArrayList<>();
+                
+                for(String key : props.getPropertyKeys()) {
+                    Map<String, Object> m = new HashMap<>(2);
+                    m.put("name", key);
+                    m.put("query", props.getProperty(key));
+                    ret.add(m);
+                }
+                
+                json = Utils.toJson(ret);
+            } else {
+                json = Utils.toJson(props.getPropertyKeys());
+            }
+            
+            return Response.ok(json).build();
+        } catch(Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+    
+    @GET
+    @Path("/{key}/query")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response endpointsDetails(@PathParam("key") String key) {
+        
+        try {
+            if (props.hasProperty(key)) {
+                String query = (String) props.getProperty(key);
+                return Response.ok(query).build();
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+        
+        return notFound();
+    }
+    
     private void close(Reader reader) {
         try {
             reader.close();
@@ -214,5 +273,9 @@ public class CypherRsService {
 
     private Response notFound() {
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    
+    private Response noContent() {
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 }
