@@ -73,7 +73,7 @@ public class CypherRsService {
             tx.finish();
         }
     }
-
+    
     @GET
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -172,6 +172,38 @@ public class CypherRsService {
         return notFound();
     }
 
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listEndpoints() {
+        
+        try {
+            String json = Utils.toJson(props.getPropertyKeys());
+            return Response.ok(json).build();
+        } catch(Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+    
+    @GET
+    @Path("/{key}/details")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response endpointsDetails(@PathParam("key") String key) {
+        
+        try {
+            if (props.hasProperty(key)) {
+                String query = (String) props.getProperty(key);
+                return Response.ok(query).build();
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+        
+        return notFound();
+    }
+    
     private void close(Reader reader) {
         try {
             reader.close();

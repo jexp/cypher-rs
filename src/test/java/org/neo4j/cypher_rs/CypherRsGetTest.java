@@ -10,6 +10,7 @@ import org.neo4j.graphdb.Transaction;
 import javax.ws.rs.core.Response;
 
 import static org.junit.Assert.assertEquals;
+import static org.neo4j.cypher_rs.RestTestBase.rootResource;
 
 /**
  * @author Michael Hunger @since 09.10.13
@@ -21,7 +22,7 @@ public class CypherRsGetTest extends RestTestBase {
     private WebResource cypherRsPath;
     public static final String QUERY = "start n=node({id}) return n";
     public static final String WRITE_QUERY = "create (n:Node {name:{name}}) return n";
-
+    
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -101,5 +102,33 @@ public class CypherRsGetTest extends RestTestBase {
         cypherRsPath.put(ClientResponse.class, WRITE_QUERY);
         ClientResponse response = cypherRsPath.queryParam("name","foobar").get(ClientResponse.class);
         assertEquals(Response.Status.NOT_ACCEPTABLE.getStatusCode(), response.getStatus());
+    }
+    
+    @Test
+    public void testListEndpoints() throws Exception {
+        cypherRsPath.put(ClientResponse.class, QUERY);
+        
+        WebResource path = rootResource.path("test");
+        WebResource path2 = path.path(KEY + 2);
+        
+        path2.put(ClientResponse.class, QUERY);
+        
+        ClientResponse response = path.get(ClientResponse.class);
+        
+        String result = response.getEntity(String.class);
+        assertEquals(result, 200, response.getStatus());
+        assertEquals("[\"foo\",\"foo2\"]", result);
+    }
+    
+    @Test
+    public void testEndpointDetails() throws Exception {
+        cypherRsPath.put(ClientResponse.class, QUERY);
+        
+        WebResource path = cypherRsPath.path("details");
+        ClientResponse response = path.get(ClientResponse.class);
+        
+        String result = response.getEntity(String.class);
+        assertEquals(result, 200, response.getStatus());
+        assertEquals(QUERY, result);
     }
 }
