@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public class CypherRsGetTest extends RestTestBase {
 
     public static final String KEY = "foo";
-    public static final String MULTI_COLUMN_QUERY = "start n=node({ids}) return length(n.name) as l, n.name as name";
+    public static final String MULTI_COLUMN_QUERY = "start n=node(*) where id(n) in {ids} return length(n.name) as l, n.name as name";
     private WebResource cypherRsPath;
     public static final String QUERY = "start n=node({id}) return n";
     public static final String WRITE_QUERY = "create (n:Node {name:{name}}) return n";
