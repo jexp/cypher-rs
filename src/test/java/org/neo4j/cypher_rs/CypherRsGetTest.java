@@ -18,7 +18,9 @@ import static org.neo4j.cypher_rs.RestTestBase.rootResource;
 public class CypherRsGetTest extends RestTestBase {
 
     public static final String KEY = "foo";
-    public static final String MULTI_COLUMN_QUERY = "start n=node({ids}) return length(n.name) as l, n.name as name";
+    //if an id does not exist when doing node({ids}) it is a cypher error.
+    //so doing it this way is more natural to an index lookup that could end up not finding a match
+    public static final String MULTI_COLUMN_QUERY = "start n=node(*) WHERE id(n) in {ids} return length(n.name) as l, n.name as name";
     private WebResource cypherRsPath;
     public static final String QUERY = "start n=node({id}) return n";
     public static final String WRITE_QUERY = "create (n:Node {name:{name}}) return n";
@@ -62,8 +64,8 @@ public class CypherRsGetTest extends RestTestBase {
     public void testQueryEndpointNoResults() throws Exception {
         cypherRsPath.put(ClientResponse.class, MULTI_COLUMN_QUERY);
         ClientResponse response = cypherRsPath
-                .queryParam("id",String.valueOf(-234))
-                .queryParam("id",String.valueOf(-567))
+                .queryParam("ids",String.valueOf(-234))
+                .queryParam("ids",String.valueOf(-567))
                 .get(ClientResponse.class);
         
         assertEquals(204, response.getStatus());
