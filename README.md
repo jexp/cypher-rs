@@ -41,7 +41,10 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
     GET /cypher-rs/users?name=Andres
 
     --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
+    
+    GET /cypher-rs/users?name=NotExists
 
+    --> 204
 
 ### POST JSON-DATA TO ENDPOINT
 
@@ -60,12 +63,20 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
     
     --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
 
+    POST /cypher-rs/users 
+    Content-type: application/json
+    Body: {"name":"NotExists"}
+    
+    --> 204
+
     POST /cypher-rs/users
     Content-type: application/json
-    Body: [{"name":"Andres"},{"name":"Peter"}]
+    Body: [{"name":"Andres"},{"name":"Peter"},{"name":"NotExists"]
     
     --> 200 [{"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]},
-             {"name":"Peter","age":32,"male":true,"children":["Neo4j","O.","K."]}]
+             {"name":"Peter","age":32,"male":true,"children":["Neo4j","O.","K."]},
+             null]
+
 
 ### POST CSV DATA TO ENDPOINT
 
