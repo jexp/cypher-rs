@@ -79,6 +79,9 @@ public class CypherRsService {
                 Map<String, Object> params = Utils.toParams(uriInfo.getQueryParameters());
                 ExecutionResult result = engine.execute(query, params);
                 String json = Utils.toJson(result);
+                if(json == null)
+                    return noContent();
+                
                 tx.success();
                 return Response.ok(json).build();
             }
@@ -104,7 +107,12 @@ public class CypherRsService {
                     results.add(Utils.toObject(result));
                 }
                 tx.success();
-                return Response.ok(Utils.toJson(singleOrList(results))).build();
+                
+                Object retVal = singleOrList(results);
+                if(retVal == null)
+                    return noContent();
+                
+                return Response.ok(Utils.toJson(retVal)).build();
             }
         } catch (BadInputException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -199,5 +207,9 @@ public class CypherRsService {
 
     private Response notFound() {
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    
+    private Response noContent() {
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 }
