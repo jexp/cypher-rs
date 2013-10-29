@@ -58,6 +58,17 @@ public class CypherRsGetTest extends RestTestBase {
     }
 
     @Test
+    public void testQueryEndpointNoResults() throws Exception {
+        cypherRsPath.put(ClientResponse.class, MULTI_COLUMN_QUERY);
+        ClientResponse response = cypherRsPath
+                .queryParam("ids",String.valueOf(-234))
+                .queryParam("ids",String.valueOf(-567))
+                .get(ClientResponse.class);
+        
+        assertEquals(204, response.getStatus());
+    }
+    
+    @Test
     public void testQueryEndpointMultipleResults() throws Exception {
         Node andres=createNode("name","Andres");
         Node peter=createNode("name","Peter");
