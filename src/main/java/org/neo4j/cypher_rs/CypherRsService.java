@@ -214,7 +214,7 @@ public class CypherRsService {
     }
     
     @GET
-    @Path("/{key}/details")
+    @Path("/{key}/query")
     @Produces(MediaType.TEXT_PLAIN)
     public Response endpointsDetails(@PathParam("key") String key) {
         

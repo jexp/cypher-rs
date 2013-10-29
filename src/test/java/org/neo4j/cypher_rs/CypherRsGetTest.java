@@ -154,7 +154,7 @@ public class CypherRsGetTest extends RestTestBase {
     public void testEndpointDetails() throws Exception {
         cypherRsPath.put(ClientResponse.class, QUERY);
         
-        WebResource path = cypherRsPath.path("details");
+        WebResource path = cypherRsPath.path("query");
         ClientResponse response = path.get(ClientResponse.class);
         
         String result = response.getEntity(String.class);
