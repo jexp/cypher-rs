@@ -79,10 +79,12 @@ public class CypherRsService {
                 Map<String, Object> params = Utils.toParams(uriInfo.getQueryParameters());
                 ExecutionResult result = engine.execute(query, params);
                 String json = Utils.toJson(result);
+                
+                tx.success();
+                
                 if(json == null)
                     return noContent();
                 
-                tx.success();
                 return Response.ok(json).build();
             }
         } catch(Exception e) {
