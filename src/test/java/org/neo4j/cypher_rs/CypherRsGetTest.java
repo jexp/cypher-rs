@@ -110,4 +110,48 @@ public class CypherRsGetTest extends RestTestBase {
         ClientResponse response = cypherRsPath.queryParam("name","foobar").get(ClientResponse.class);
         assertEquals(Response.Status.NOT_ACCEPTABLE.getStatusCode(), response.getStatus());
     }
+    
+    @Test
+    public void testListEndpoints() throws Exception {
+        cypherRsPath.put(ClientResponse.class, QUERY);
+        
+        WebResource path = rootResource.path("test");
+        WebResource path2 = path.path(KEY + 2);
+        
+        path2.put(ClientResponse.class, QUERY);
+        
+        ClientResponse response = path.get(ClientResponse.class);
+        
+        String result = response.getEntity(String.class);
+        assertEquals(result, 200, response.getStatus());
+        assertEquals("[\"foo\",\"foo2\"]", result);
+    }
+    
+    @Test
+    public void testListEndpointsFull() throws Exception {
+        cypherRsPath.put(ClientResponse.class, QUERY);
+        
+        WebResource path = rootResource.path("test");
+        WebResource path2 = path.path(KEY + 2);
+        
+        path2.put(ClientResponse.class, MULTI_COLUMN_QUERY);
+        
+        ClientResponse response = path.queryParam("full", "true").get(ClientResponse.class);
+        
+        String result = response.getEntity(String.class);
+        assertEquals(result, 200, response.getStatus());
+        assertEquals("[{\"query\":\"" + QUERY + "\",\"name\":\"foo\"},{\"query\":\"" + MULTI_COLUMN_QUERY + "\",\"name\":\"foo2\"}]", result);
+    }
+    
+    @Test
+    public void testEndpointQuery() throws Exception {
+        cypherRsPath.put(ClientResponse.class, QUERY);
+        
+        WebResource path = cypherRsPath.path("query");
+        ClientResponse response = path.get(ClientResponse.class);
+        
+        String result = response.getEntity(String.class);
+        assertEquals(result, 200, response.getStatus());
+        assertEquals(QUERY, result);
+    }
 }
