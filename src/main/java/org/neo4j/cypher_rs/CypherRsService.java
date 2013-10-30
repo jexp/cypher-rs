@@ -196,16 +196,14 @@ public class CypherRsService {
             String json;
             if(isFull) {
                 
-                List<Map<String, Object>> ret = new ArrayList<>();
+                Map<String, Object> m = new HashMap<>(2);
                 
                 for(String key : props.getPropertyKeys()) {
-                    Map<String, Object> m = new HashMap<>(2);
-                    m.put("name", key);
-                    m.put("query", props.getProperty(key));
-                    ret.add(m);
+                    
+                    m.put(key, props.getProperty(key));
                 }
                 
-                json = Utils.toJson(ret);
+                json = Utils.toJson(m);
             } else {
                 json = Utils.toJson(props.getPropertyKeys());
             }

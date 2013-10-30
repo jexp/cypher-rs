@@ -140,7 +140,7 @@ public class CypherRsGetTest extends RestTestBase {
         
         String result = response.getEntity(String.class);
         assertEquals(result, 200, response.getStatus());
-        assertEquals("[{\"query\":\"" + QUERY + "\",\"name\":\"foo\"},{\"query\":\"" + MULTI_COLUMN_QUERY + "\",\"name\":\"foo2\"}]", result);
+        assertEquals("{\"foo\":\"" + QUERY + "\",\"foo2\":\"" + MULTI_COLUMN_QUERY + "\"}", result);
     }
     
     @Test
