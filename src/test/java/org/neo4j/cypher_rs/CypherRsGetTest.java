@@ -9,6 +9,7 @@ import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.core.Response;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -58,8 +59,8 @@ public class CypherRsGetTest extends RestTestBase {
     public void testQueryEndpointNoResults() throws Exception {
         cypherRsPath.put(ClientResponse.class, MULTI_COLUMN_QUERY);
         ClientResponse response = cypherRsPath
-                .queryParam("id",String.valueOf(-234))
-                .queryParam("id",String.valueOf(-567))
+                .queryParam("ids",String.valueOf(-234))
+                .queryParam("ids",String.valueOf(-567))
                 .get(ClientResponse.class);
         
         assertEquals(204, response.getStatus());
