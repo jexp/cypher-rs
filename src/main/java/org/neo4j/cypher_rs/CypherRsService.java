@@ -32,7 +32,6 @@ import java.util.*;
 @Path("/")
 public class CypherRsService {
 
-
     private final ExecutionEngine engine;
     private final GraphDatabaseAPI db;
     private final GraphProperties props;
@@ -41,6 +40,17 @@ public class CypherRsService {
         engine = executor.getExecutionEngine();
         db = database.getGraph();
         props = db.getDependencyResolver().resolveDependency(NodeManager.class).getGraphProperties();
+    }
+
+    @PUT
+    @Path("/{key}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public Response createEndpoint(@PathParam("key") String key, String body, @Context UriInfo uriInfo) {
+        try (Transaction tx = db.beginTx()) {
+            props.setProperty(key, body);
+            tx.success();
+            return Response.created(uriInfo.getRequestUri()).build();
+        }
     }
 
     @DELETE
@@ -55,17 +65,6 @@ public class CypherRsService {
             }
         }
         return notFound();
-    }
-
-    @PUT
-    @Path("/{key}")
-    @Consumes(MediaType.TEXT_PLAIN)
-    public Response createEndpoint(@PathParam("key") String key, String body, @Context UriInfo uriInfo) {
-        try (Transaction tx = db.beginTx()) {
-            props.setProperty(key, body);
-            tx.success();
-            return Response.created(uriInfo.getRequestUri()).build();
-        }
     }
 
     @GET

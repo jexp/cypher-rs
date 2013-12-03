@@ -27,7 +27,7 @@ import org.neo4j.kernel.impl.core.NodeManager;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.configuration.PropertyFileConfigurator;
 import org.neo4j.server.database.Database;
-import org.neo4j.server.database.WrappingDatabase;
+import org.neo4j.server.database.WrappedDatabase;
 import org.neo4j.server.modules.RESTApiModule;
 import org.neo4j.server.modules.ServerModule;
 import org.neo4j.server.modules.ThirdPartyJAXRSModule;
@@ -78,7 +78,7 @@ public class LocalTestServer {
 
             @Override
             protected Database createDatabase() {
-                return new WrappingDatabase(graphDatabase);
+                return new WrappedDatabase(graphDatabase);
             }
 
             @Override
