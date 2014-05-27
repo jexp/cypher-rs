@@ -1,5 +1,7 @@
 ## Cypher-RS
 
+*[Presentation about Cypher-RS](http://slideshare.net/neo4j/document-oriented-access-to-graphs)*
+
 Neo4j server-extension that allows to configure fixed REST-Endpoints for Cypher queries.
 
 You can `PUT` cypher queries to an endpoint with a certain url-suffix and then later execute those queries by running
@@ -160,3 +162,76 @@ lists.
 * all endpoints should be able to generate CSV when supplied with the accept header
 * replace Jackson with faster Gson?
 * performance tests
+
+### Concrete Example for the Movie-Graph in Neo4j-Server
+
+#### A "movie and cast" endpoint
+
+* parameter: `title`
+* result: a document with the movie title and a collection of cast names
+
+````bash
+curl -i -XPUT -H content-type:text/plain \
+ -d'MATCH (movie:Movie {title:{title}})
+    OPTIONAL MATCH (movie)<-[:ACTED_IN]-(actor)
+    RETURN {title:movie.title, cast: collect(actor.name)} as movie' \
+ http://localhost:7474/cypher-rs/movie
+
+// use it
+
+curl http://localhost:7474/cypher-rs/movie?title=The%20Matrix
+````
+
+#### A "co-actors" endpoint
+
+* parameter: `name`
+* result: a document of the requested actor and actors who co-acted in the same movies, ordered by frequency
+
+````bash
+curl -i -XPUT -H content-type:text/plain \
+ -d'MATCH (actor:Person {name:{name}})-[:ACTED_IN*2..2]-(co_actor)
+    WITH actor.name as name, {name:co_actor.name, count: count(*)} as co_actors
+    ORDER BY count(*) DESC
+    RETURN {name:name, co_actors: collect(co_actors)} as result' \
+ http://localhost:7474/cypher-rs/co-actor
+
+// use it
+
+curl -i http://localhost:7474/cypher-rs/co-actor?name=Keanu%20Reeves
+````
+
+#### A "create movie only" endpoint
+
+* parameters: `title` and `released`
+* result: document with the movie's properties
+* uses `MERGE` as "get-or-create" operation
+
+````bash
+curl -i -XPUT -H content-type:text/plain \
+-d'MERGE (movie:Movie {title:{title}}) ON CREATE SET movie.released={released} RETURN movie' \
+ http://localhost:7474/cypher-rs/create-movie
+
+// use it
+
+curl -i -XPOST -H content-type:application/json -d'{"title":"Forrest Gump","released":1994}' http://localhost:7474/cypher-rs/create-movie
+````
+
+#### A "create movie with cast" endpoint
+
+* parameters: `title`, `released` for the movies, `actors` for the actor names
+* result: document with the movie's properties
+* uses `MERGE` as "get-or-create" operation for both movie and actors
+
+````bash
+curl -i -XPUT -H content-type:text/plain \
+-d'MERGE (movie:Movie {title:{title}}) ON CREATE SET movie.released={released}
+   FOREACH (name in {actors} | MERGE (actor:Person {name:name}) MERGE (actor)-[:ACTED_IN]->(movie))
+   RETURN movie' \
+ http://localhost:7474/cypher-rs/create-movie2
+
+// use it
+
+curl -i -XPOST -H content-type:application/json -d'{"title":"Forrest Gump","released":1994, "actors":["Tom Hanks","Robin Wright","Gary Sinise"]}' http://localhost:7474/cypher-rs/create-movie2
+
+curl http://localhost:7474/cypher-rs/movie?title=Forrest%20Gump
+```
