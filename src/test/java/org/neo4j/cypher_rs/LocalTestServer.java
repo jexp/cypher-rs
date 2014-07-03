@@ -23,6 +23,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.impl.core.GraphPropertiesImpl;
 import org.neo4j.kernel.impl.core.NodeManager;
+import org.neo4j.kernel.logging.DevNullLoggingService;
+import org.neo4j.kernel.logging.Logging;
+import org.neo4j.kernel.logging.SystemOutLogging;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.configuration.PropertyFileConfigurator;
 import org.neo4j.server.database.Database;
@@ -68,8 +71,10 @@ public class LocalTestServer {
         if (neoServer!=null) throw new IllegalStateException("Server already running");
         URL url = getClass().getResource("/" + propertiesFile);
         if (url==null) throw new IllegalArgumentException("Could not resolve properties file "+propertiesFile);
-        final Jetty9WebServer jettyWebServer = new Jetty9WebServer();
-        neoServer = new CommunityNeoServer(new PropertyFileConfigurator(new File(url.getPath()))) {
+        Logging logging = new DevNullLoggingService();
+        final Jetty9WebServer jettyWebServer = new Jetty9WebServer(logging);
+        final PropertyFileConfigurator configurator = new PropertyFileConfigurator(new File(url.getPath()));
+        neoServer = new CommunityNeoServer(configurator, logging) {
             @Override
             protected int getWebServerPort() {
                 return port;
@@ -82,7 +87,7 @@ public class LocalTestServer {
 
             @Override
             protected PreFlightTasks createPreflightTasks() {
-                return new PreFlightTasks();
+                return new PreFlightTasks(logging);
             }
 
             @Override
@@ -93,8 +98,8 @@ public class LocalTestServer {
             @Override
             protected Iterable<ServerModule> createServerModules() {
                 return Arrays.<ServerModule>asList(
-                        new RESTApiModule(webServer,database,configurator.configuration()),
-                        new ThirdPartyJAXRSModule(webServer, configurator, this));
+                        new RESTApiModule(webServer,database,configurator.configuration(), logging),
+                        new ThirdPartyJAXRSModule(webServer, configurator, logging, this));
             }
         };
         neoServer.start();
