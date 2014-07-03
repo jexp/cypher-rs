@@ -21,7 +21,6 @@ package org.neo4j.cypher_rs;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.kernel.impl.core.GraphPropertiesImpl;
 import org.neo4j.kernel.impl.core.NodeManager;
 import org.neo4j.server.CommunityNeoServer;

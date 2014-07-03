@@ -27,10 +27,10 @@ public class CypherRsPostTest extends RestTestBase {
     public static final String MULTI_COLUMN_QUERY = "match n where id(n) in {ids} return length(n.name) as l, n.name as name";
     public static final String QUERY = "start n=node({id}) return n";
     public static final String WRITE_QUERY = "create (n:Node {name:{name}}) return n";
-    
+
     //doing a node lookup by ID is a Cypher error, so it's a bit roundabout to represent more of a normal index lookup which wouldn't be a cypher error
     public static final String UPDATE_QUERY = "match n where id(n) = {id} SET n.name={name} return n";
-    
+
     private WebResource cypherRsPath;
 
     @Before
@@ -67,57 +67,57 @@ public class CypherRsPostTest extends RestTestBase {
 
     @Test
     public void testQueryEndpointNoResults() throws Exception {
-        
+
         cypherRsPath.put(ClientResponse.class, UPDATE_QUERY);
         Map<String,Object> payload = map("id", -234);
         payload.put("name", "Neo");
-        
+
         ClientResponse response = post(payload);
         assertEquals(204, response.getStatus());
     }
-    
+
     @Test
     public void testQueryEndpointMultiAddNoResults() throws Exception {
-        
+
         cypherRsPath.put(ClientResponse.class, UPDATE_QUERY);
         Map<String,Object> payload1 = map("id", -234);
         payload1.put("name", "Neo");
-        
+
         Map<String,Object> payload2 = map("id", -234);
         payload2.put("name", "Neo");
-        
+
         List<Map<String,Object>> items = new ArrayList<>();
         items.add(payload1);
         items.add(payload2);
-        
+
         ClientResponse response =  cypherRsPath.entity(Utils.toJson(items), MediaType.APPLICATION_JSON_TYPE).post(ClientResponse.class);
         String result = response.getEntity(String.class);
         assertEquals(200, response.getStatus());
         assertEquals("[null,null]", result);
     }
-    
+
     @Test
     public void testQueryEndpointMultiAddSomeResults() throws Exception {
-        
+
         Node node=createNode("name","bar");
-        
+
         cypherRsPath.put(ClientResponse.class, UPDATE_QUERY);
         Map<String,Object> payload1 = map("id", node.getId());
         payload1.put("name", "Neo");
-        
+
         Map<String,Object> payload2 = map("id", -234);
         payload2.put("name", "Neo2");
-        
+
         List<Map<String,Object>> items = new ArrayList<>();
         items.add(payload1);
         items.add(payload2);
-        
+
         ClientResponse response =  cypherRsPath.entity(Utils.toJson(items), MediaType.APPLICATION_JSON_TYPE).post(ClientResponse.class);
         String result = response.getEntity(String.class);
         assertEquals(200, response.getStatus());
         assertEquals("[{\"name\":\"Neo\"},null]", result);
     }
-    
+
     @Test
     public void testQueryEndpointMultipleResults() throws Exception {
         Node andres=createNode("name","Andres");
