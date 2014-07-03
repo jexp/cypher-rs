@@ -21,9 +21,11 @@ package org.neo4j.cypher_rs;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.IteratorUtil;
+import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.core.GraphPropertiesImpl;
 import org.neo4j.kernel.impl.core.NodeManager;
+import org.neo4j.kernel.logging.DevNullLoggingService;
+import org.neo4j.kernel.logging.Logging;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.configuration.PropertyFileConfigurator;
 import org.neo4j.server.database.Database;
@@ -32,8 +34,6 @@ import org.neo4j.server.modules.RESTApiModule;
 import org.neo4j.server.modules.ServerModule;
 import org.neo4j.server.modules.ThirdPartyJAXRSModule;
 import org.neo4j.server.preflight.PreFlightTasks;
-import org.neo4j.server.web.Jetty9WebServer;
-import org.neo4j.server.web.WebServer;
 import org.neo4j.test.ImpermanentGraphDatabase;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -69,33 +69,26 @@ public class LocalTestServer {
         if (neoServer!=null) throw new IllegalStateException("Server already running");
         URL url = getClass().getResource("/" + propertiesFile);
         if (url==null) throw new IllegalArgumentException("Could not resolve properties file "+propertiesFile);
-        final Jetty9WebServer jettyWebServer = new Jetty9WebServer();
-        neoServer = new CommunityNeoServer(new PropertyFileConfigurator(new File(url.getPath()))) {
+        Logging logging = new DevNullLoggingService();
+        final PropertyFileConfigurator configurator = new PropertyFileConfigurator(new File(url.getPath()));
+        final LocalTestDbFactory dbFactory = new LocalTestDbFactory(new WrappedDatabase(graphDatabase));
+        neoServer = new CommunityNeoServer(configurator, dbFactory, logging) {
+
             @Override
             protected int getWebServerPort() {
                 return port;
             }
 
             @Override
-            protected Database createDatabase() {
-                return new WrappedDatabase(graphDatabase);
-            }
-
-            @Override
             protected PreFlightTasks createPreflightTasks() {
-                return new PreFlightTasks();
-            }
-
-            @Override
-            protected WebServer createWebServer() {
-                return jettyWebServer;
+                return new PreFlightTasks(logging);
             }
 
             @Override
             protected Iterable<ServerModule> createServerModules() {
-                return Arrays.<ServerModule>asList(
-                        new RESTApiModule(webServer,database,configurator.configuration()),
-                        new ThirdPartyJAXRSModule(webServer, configurator, this));
+                return Arrays.asList(
+                        new RESTApiModule(webServer, database, configurator.configuration(), logging),
+                        new ThirdPartyJAXRSModule(webServer, configurator, logging, this));
             }
         };
         neoServer.start();
@@ -147,6 +140,19 @@ public class LocalTestServer {
                 props.removeProperty(key);
             }
             tx.success();
+        }
+    }
+
+    private static class LocalTestDbFactory implements Database.Factory {
+        private final Database db;
+
+        private LocalTestDbFactory(Database db) {
+            this.db = db;
+        }
+
+        @Override
+        public Database newDatabase(final Config config, final Logging logging) {
+            return db;
         }
     }
 

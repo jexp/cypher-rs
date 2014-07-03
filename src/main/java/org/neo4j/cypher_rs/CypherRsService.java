@@ -20,7 +20,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.util.*;
 
@@ -78,12 +77,12 @@ public class CypherRsService {
                 Map<String, Object> params = Utils.toParams(uriInfo.getQueryParameters());
                 ExecutionResult result = engine.execute(query, params);
                 String json = Utils.toJson(result);
-                
+
                 tx.success();
-                
+
                 if(json == null)
                     return noContent();
-                
+
                 return Response.ok(json).build();
             }
         } catch(Exception e) {
@@ -108,11 +107,11 @@ public class CypherRsService {
                     results.add(Utils.toObject(result));
                 }
                 tx.success();
-                
+
                 Object retVal = singleOrList(results);
                 if(retVal == null)
                     return noContent();
-                
+
                 return Response.ok(Utils.toJson(retVal)).build();
             }
         } catch (BadInputException e) {
@@ -209,7 +208,7 @@ public class CypherRsService {
     private Response notFound() {
         return Response.status(Response.Status.NOT_FOUND).build();
     }
-    
+
     private Response noContent() {
         return Response.status(Response.Status.NO_CONTENT).build();
     }

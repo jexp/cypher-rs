@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.6.1</slf4j.version>
-        <neo4j.version>2.0.0-RC1</neo4j.version>
+        <neo4j.version>2.1.2</neo4j.version>
         <jersey.version>1.9</jersey.version>
         <license-text.header>GPL-3-header.txt</license-text.header>
     </properties>
@@ -113,10 +113,6 @@ the relevant Commercial Agreement.
               <exclusion>
                   <groupId>org.apache.felix</groupId>
                   <artifactId>org.apache.felix.fileinstall</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>org.neo4j</groupId>
-                  <artifactId>neo4j-shell</artifactId>
               </exclusion>
           </exclusions>
         </dependency>
