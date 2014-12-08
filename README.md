@@ -143,7 +143,7 @@ multiple columns, multiple rows (column names are keys)
 
 Build with `mvn clean install dependency:copy-dependencies`
 
-Copy files `cp target/cypher-rs-2.0-SNAPSHOT.jar target/dependency/opencsv-2.3.jar path/to/server/plugins`
+Copy files `cp target/cypher-rs-2.1-SNAPSHOT.jar target/dependency/opencsv-2.3.jar path/to/server/plugins`
 
 Add this line to `path/to/server/conf/neo4j-server.properties`
 

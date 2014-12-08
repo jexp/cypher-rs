@@ -22,8 +22,10 @@ package org.neo4j.cypher_rs;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.IteratorUtil;
+import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.core.GraphPropertiesImpl;
 import org.neo4j.kernel.impl.core.NodeManager;
+import org.neo4j.kernel.logging.Logging;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.configuration.PropertyFileConfigurator;
 import org.neo4j.server.database.Database;
@@ -54,6 +56,7 @@ public class LocalTestServer {
     private final String hostname;
     protected String propertiesFile = "test-db.properties";
     private final ImpermanentGraphDatabase graphDatabase;
+    private Logging logging;
 
     public LocalTestServer() {
         this("localhost",7473);
@@ -63,27 +66,30 @@ public class LocalTestServer {
         this.port = port;
         this.hostname = hostname;
         graphDatabase = (ImpermanentGraphDatabase) new TestGraphDatabaseFactory().newImpermanentDatabase();
+        logging = graphDatabase.getDependencyResolver().resolveDependency(Logging.class);
     }
 
     public void start() {
         if (neoServer!=null) throw new IllegalStateException("Server already running");
         URL url = getClass().getResource("/" + propertiesFile);
         if (url==null) throw new IllegalArgumentException("Could not resolve properties file "+propertiesFile);
-        final Jetty9WebServer jettyWebServer = new Jetty9WebServer();
-        neoServer = new CommunityNeoServer(new PropertyFileConfigurator(new File(url.getPath()))) {
+        final Jetty9WebServer jettyWebServer = new Jetty9WebServer(logging);
+
+        Database.Factory factory = new Database.Factory() {
+            @Override
+            public Database newDatabase(Config config, Logging logging) {
+                return new WrappedDatabase(graphDatabase);
+            }
+        };
+        neoServer = new CommunityNeoServer(new PropertyFileConfigurator(new File(url.getPath())),factory,logging) {
             @Override
             protected int getWebServerPort() {
                 return port;
             }
 
             @Override
-            protected Database createDatabase() {
-                return new WrappedDatabase(graphDatabase);
-            }
-
-            @Override
             protected PreFlightTasks createPreflightTasks() {
-                return new PreFlightTasks();
+                return new PreFlightTasks(logging);
             }
 
             @Override
@@ -94,8 +100,8 @@ public class LocalTestServer {
             @Override
             protected Iterable<ServerModule> createServerModules() {
                 return Arrays.<ServerModule>asList(
-                        new RESTApiModule(webServer,database,configurator.configuration()),
-                        new ThirdPartyJAXRSModule(webServer, configurator, this));
+                        new RESTApiModule(webServer,database,configurator.configuration(),logging),
+                        new ThirdPartyJAXRSModule(webServer, configurator, logging, this));
             }
         };
         neoServer.start();
