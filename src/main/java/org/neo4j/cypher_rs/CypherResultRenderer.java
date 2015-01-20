@@ -17,23 +17,30 @@ public class CypherResultRenderer {
         try (ResourceIterator<Map<String, Object>> it = result.iterator()) {
 
             Object object = null;
-
             if(it.hasNext()) {
-                object = convertRows(it);
+                Map<String, Object> firstRow = it.next();
+                object = convertRows(it, firstRow);
             }
 
             return object;
 
-
         }
     }
 
-    Object convertRows(Iterator<Map<String, Object>> rows) {
+    Object convertRows(Iterator<Map<String, Object>> rows, Map<String, Object> firstRow) {
         List<Object> list = new ArrayList<>();
+        list.add(convertRow(firstRow));
         while (rows.hasNext()) {
-            list.add(convert(rows.next()));
+            list.add(convertRow(rows.next()));
         }
         return list;
+    }
+
+    Object convertRow(Map<String, Object> row) {
+        if (row.size()==1)
+            return convert(row.values().iterator().next());
+
+        return convert(row);
     }
 
     Map<String,Object> convert(Map<String,Object> map) {
