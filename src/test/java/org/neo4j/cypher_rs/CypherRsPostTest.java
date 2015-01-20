@@ -62,7 +62,7 @@ public class CypherRsPostTest extends RestTestBase {
         ClientResponse response = post(payload);
         String result = response.getEntity(String.class);
         assertEquals(result, 200, response.getStatus());
-        assertEquals("{\"foo\":\"bar\"}", result);
+        assertEquals("[{\"foo\":\"bar\"}]", result);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class CypherRsPostTest extends RestTestBase {
         ClientResponse response =  cypherRsPath.entity(Utils.toJson(items), MediaType.APPLICATION_JSON_TYPE).post(ClientResponse.class);
         String result = response.getEntity(String.class);
         assertEquals(200, response.getStatus());
-        assertEquals("[{\"name\":\"Neo\"},null]", result);
+        assertEquals("[[{\"name\":\"Neo\"}],null]", result);
     }
     
     @Test
@@ -136,7 +136,7 @@ public class CypherRsPostTest extends RestTestBase {
         ClientResponse response = post(map("ids", asList(andres.getId())));
         String result = response.getEntity(String.class);
         assertEquals(result, 200, response.getStatus());
-        assertEquals("{\"l\":6,\"name\":\"Andres\"}", result);
+        assertEquals("[{\"l\":6,\"name\":\"Andres\"}]", result);
     }
 
     @Test
@@ -155,7 +155,7 @@ public class CypherRsPostTest extends RestTestBase {
         ClientResponse response = post(map("name", "foobar"));
         String result = response.getEntity(String.class);
         assertEquals(result, 200, response.getStatus());
-        assertEquals("{\"name\":\"foobar\"}", result);
+        assertEquals("[{\"name\":\"foobar\"}]", result);
     }
 
     private ClientResponse post(Map<String, Object> payload) throws IOException {

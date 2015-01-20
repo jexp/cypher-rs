@@ -23,13 +23,18 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 
     PUT /cypher-rs/users
     Content-type: plain/text
-    Body: match (n:User) where n.name={name} return n
+    
+    Body:
+    MATCH (n:User) WHERE n.name={name} RETURN n
     
     --> 201 Location: /cypher-rs/users
+</br>
 
     PUT /cypher-rs/create-user
     Content-type: plain/text
-    Body: create (n:Node {name:{name},age:{age},male:{male}})
+    
+    Body:
+    CREATE (n:Node {name:{name},age:{age},male:{male}})
     
     --> 201 Location: /cypher-rs/create-user
 
@@ -38,12 +43,25 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
     Verb: GET
     URL: /cypher-rs/<yourEndpoint>
 
-#### Example
+#### Examples
 
     GET /cypher-rs/users?name=Andres
 
-    --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
-    
+    --> 200
+    [
+        {
+            "name": "Andres",
+            "age": 21,
+            "male": true,
+            "children": [
+                "Cypher",
+                "L.",
+                "N."
+            ]
+        }
+    ]
+</br>
+
     GET /cypher-rs/users?name=NotExists
 
     --> 204
@@ -61,23 +79,78 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 
     POST /cypher-rs/users 
     Content-type: application/json
-    Body: {"name":"Andres"}
     
-    --> 200 {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
+    Body:
+    {
+        "name": "Andres"
+    }
+    
+    --> 200
+    [
+        {
+            "name": "Andres",
+            "age": 21,
+            "male": true,
+            "children": [
+                "Cypher",
+                "L.",
+                "N."
+            ]
+        }
+    ]
+</br>
 
     POST /cypher-rs/users 
     Content-type: application/json
-    Body: {"name":"NotExists"}
+    
+    Body: 
+    {
+        "name": "NotExists"
+    }
     
     --> 204
+</br>
 
     POST /cypher-rs/users
     Content-type: application/json
-    Body: [{"name":"Andres"},{"name":"Peter"},{"name":"NotExists"]
     
-    --> 200 [{"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]},
-             {"name":"Peter","age":32,"male":true,"children":["Neo4j","O.","K."]},
-             null]
+    Body:
+    [
+        {
+            "name": "Andres"
+        },
+        {
+            "name": "Peter"
+        },
+        {
+            "name": "NotExists"
+        }
+    ]
+    
+    --> 200
+    [
+        {
+            "name": "Andres",
+            "age": 21,
+            "male": true,
+            "children": [
+                "Cypher",
+                "L.",
+                "N."
+            ]
+        },
+        {
+            "name": "Peter",
+            "age": 32,
+            "male": true,
+            "children": [
+                "Neo4j",
+                "O.",
+                "K."
+            ]
+        },
+        null
+    ]
 
 
 ### POST CSV DATA TO ENDPOINT
@@ -93,15 +166,31 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 
     POST /cypher-rs/create-user
     Content-type: text/plain
-    Body: name,age,male\nAndres,21,true
     
-    --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
+    Body:
+    name,age,male\nAndres,21,true
+    
+    --> 200
+    {
+        "nodes_created": 1,
+        "labels_added": 1,
+        "properties_set": 3,
+        "rows": 1
+    }
+</br>
 
     POST /cypher-rs/create-user?delim=\t&batch=20000
     Content-type: text/plain
+    
     Body: name\tage\tmale\nAndres\t21\ttrue
     
-    --> 200 {"nodes_created":1,"labels_added":1,"properties_set":3,"rows":1}
+    --> 200
+    {
+        "nodes_created": 1,
+        "labels_added": 1,
+        "properties_set": 3,
+        "rows": 1
+    }
 
 ### DELETE ENDPOINT
 
@@ -149,25 +238,80 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 
 single column, single row
 
-    {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]}
+    [
+        {
+            "name": "Andres",
+            "age": 21,
+            "male": true,
+            "children": [
+                "Cypher",
+                "L.",
+                "N."
+            ]
+        }
+    ]
 
 single column, multiple rows
 
     [
-     {"name":"Andres","age":21,"male":true,"children":["Cypher","L.","N."]},
-     {"name":"Peter","age":32,"male":true,"children":["Neo4j","O.","K."]}
+        {
+            "name": "Andres",
+            "age": 21,
+            "male": true,
+            "children": [
+                "Cypher",
+                "L.",
+                "N."
+            ]
+        },
+        {
+            "name": "Peter",
+            "age": 32,
+            "male": true,
+            "children": [
+                "Neo4j",
+                "O.",
+                "K."
+            ]
+        }
     ]
 
 multiple columns, single row (column names are keys)
 
-    {"user": "Andres", "friends": ["Peter","Michael"]}
+    [
+        {
+            "user": "Andres",
+            "friends": [
+                "Peter",
+                "Michael"
+            ]
+        }
+    ]
 
 multiple columns, multiple rows (column names are keys)
 
     [
-      {"user": "Andres", "friends": ["Peter","Michael"]},
-      {"user": "Michael", "friends": ["Peter","Andres"]},
-      {"user": "Peter", "friends": ["Andres","Michael"]}
+        {
+            "user": "Andres",
+            "friends": [
+                "Peter",
+                "Michael"
+            ]
+        },
+        {
+            "user": "Michael",
+            "friends": [
+                "Peter",
+                "Andres"
+            ]
+        },
+        {
+            "user": "Peter",
+            "friends": [
+                "Andres",
+                "Michael"
+            ]
+        }
     ]
 
 ### Configuration
