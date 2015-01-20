@@ -15,32 +15,25 @@ public class CypherResultRenderer {
 
     public Object render(ExecutionResult result) {
         try (ResourceIterator<Map<String, Object>> it = result.iterator()) {
-            if(!it.hasNext())
-                return null;
-            
-            Map<String, Object> firstRow = it.next();
-            if (it.hasNext()) {
-               return convertRows(it, firstRow);
-            } else {
-                return convertRow(firstRow);
+
+            Object object = null;
+
+            if(it.hasNext()) {
+                object = convertRows(it);
             }
+
+            return object;
+
+
         }
     }
 
-    Object convertRows(Iterator<Map<String, Object>> rows, Map<String, Object> firstRow) {
+    Object convertRows(Iterator<Map<String, Object>> rows) {
         List<Object> list = new ArrayList<>();
-        list.add(convertRow(firstRow));
         while (rows.hasNext()) {
-            list.add(convertRow(rows.next()));
+            list.add(convert(rows.next()));
         }
         return list;
-    }
-
-    Object convertRow(Map<String, Object> row) {
-        if (row.size()==1)
-            return convert(row.values().iterator().next());
-
-        return convert(row);
     }
 
     Map<String,Object> convert(Map<String,Object> map) {
