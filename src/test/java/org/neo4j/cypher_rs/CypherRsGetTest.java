@@ -9,7 +9,6 @@ import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.core.Response;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -52,7 +51,7 @@ public class CypherRsGetTest extends RestTestBase {
         ClientResponse response = cypherRsPath.queryParam("id",String.valueOf(node.getId())).get(ClientResponse.class);
         String result = response.getEntity(String.class);
         assertEquals(result, 200, response.getStatus());
-        assertEquals("{\"foo\":\"bar\"}", result);
+        assertEquals("[{\"foo\":\"bar\"}]", result);
     }
 
     @Test
@@ -89,7 +88,7 @@ public class CypherRsGetTest extends RestTestBase {
                 .get(ClientResponse.class);
         String result = response.getEntity(String.class);
         assertEquals(result, 200, response.getStatus());
-        assertEquals("{\"l\":6,\"name\":\"Andres\"}", result);
+        assertEquals("[{\"l\":6,\"name\":\"Andres\"}]", result);
     }
 
     @Test
