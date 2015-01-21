@@ -102,6 +102,7 @@ You can `PUT` cypher queries to an endpoint with a certain url-suffix and then l
 
     POST /cypher-rs/users 
     Content-type: application/json
+    
     Body: 
     {
         "name": "NotExists"
