@@ -184,6 +184,61 @@ public class CypherRsService {
                 stats.getLabelsAdded(), stats.getLabelsRemoved(), stats.getPropertiesSet(), IteratorUtil.count(result));
     }
 
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listEndpoints(@DefaultValue("false") @QueryParam("full") boolean isFull) {
+        
+        Transaction tx = db.beginTx();
+        try {
+            
+            String json;
+            if(isFull) {
+                
+                Map<String, Object> m = new HashMap<>(2);
+                
+                for(String key : props.getPropertyKeys()) {
+                    
+                    m.put(key, props.getProperty(key));
+                }
+                
+                json = Utils.toJson(m);
+            } else {
+                json = Utils.toJson(props.getPropertyKeys());
+            }
+            tx.success();
+            return Response.ok(json).build();
+        } catch(Exception e) {
+            tx.failure();
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        } finally {
+            tx.close();
+        }
+    }
+    
+    @GET
+    @Path("/{key}/query")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response endpointsDetails(@PathParam("key") String key) {
+        Transaction tx = db.beginTx();
+        try {
+            if (props.hasProperty(key)) {
+                String query = (String) props.getProperty(key);
+                tx.success();
+                return Response.ok(query).build();
+            }
+        } catch(Exception e) {
+            tx.failure();
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        } finally {
+            tx.close();
+        }
+        
+        return notFound();
+    }
+    
     private <T> Map<String, T> toMap(T value,String...row) {
         Map<String, T> result = new LinkedHashMap<>(row.length);
         for (String field : row) {
